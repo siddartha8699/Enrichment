@@ -1,0 +1,34 @@
+package college.project2
+
+trait Join[L, R, Q] {
+  def join(a: List[L], b: List[R]): List[Q]
+}
+
+class MapJoin extends Join[Trips, Routes, RouteTrips] {
+  override def join(a: List[Trips], b: List[Routes]): List[RouteTrips] = {
+
+    val t: Map[Int, Routes] = b.map(route => route.route_id -> route).toMap
+    a.filter(trip => t.contains(trip.route_id)).map(trip => RouteTrips(trip, Some(t(trip.route_id))))
+
+  }
+}
+
+class NestedLoopJoin extends Join[RouteTrips, Calendar, EnrichedTrip] {
+  override def join(a: List[RouteTrips], b: List[Calendar]): List[EnrichedTrip] =
+    for {
+      routeTrips <- a
+      calendar <- b
+      if routeTrips.trip.service_id == calendar.service_id
+    }
+      yield EnrichedTrip(routeTrips, Some(calendar))
+}
+
+
+
+
+
+
+
+
+
+
