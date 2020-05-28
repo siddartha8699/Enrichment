@@ -1,0 +1,64 @@
+package college.project2
+
+import java.io.{BufferedWriter, File, FileWriter}
+
+import scala.io.Source
+
+object Enricher extends App {
+  /*println("route_id","service_id","trip_id","trip_headSign","direction_id","shape_id","wheelchair_accessible","note_fr,note_en")*/
+  def tripList: List[Trips] = {
+    val Y = Source.fromFile("D:/gtfs_stm/trips.txt")
+    val input = Y.getLines().drop(1)
+      .toList
+      .tail
+      .map(_.split(",", -1))
+      .map(p => Trips(p(0).toInt, p(1), p(2), p(3), p(4).toInt, p(5).toInt, p(6).toInt,
+        if (p(7).isEmpty) None else Some(p(7)),
+        if (p(8).isEmpty) None else Some(p(8))))
+    Y.close()
+    input
+  }
+
+  def routeList: List[Routes] = {
+    val z = Source.fromFile("D:/gtfs_stm/routes.txt")
+    val input = z.getLines().drop(1)
+      .toList
+      .tail
+      .map(_.split(",", -1))
+      .map(p => Routes(p(0).toInt, p(1), p(2), p(3), p(4), p(5), p(6),p(7)))
+    z.close()
+    input
+  }
+
+  val routeTrip: List[RouteTrips] = new MapJoin().join(tripList, routeList)
+
+  def calendar: List[Calendar] = {
+    val k = Source.fromFile("D:/gtfs_stm/calendar.txt")
+    val input = k.getLines().drop(1)
+      .toList
+      .tail
+      .map(_.split(",", -1))
+      .map(p => Calendar(p(0), p(1), p(2).toInt, p(3).toInt, p(4).toInt, p(5).toInt, p(6).toInt, p(7).toInt, p(8), p(9)))
+    k.close()
+    input
+  }
+  val enriched: List[EnrichedTrip] = new NestedLoopJoin().join(routeTrip, calendar)
+
+/*  val enrichedTrip: List[JoinOutput] = new GenericNestedLoopJoin[Calendar, RouteTrips]((i, j) => i.service_id == j.trip.service_id)
+    .join(calendar, routeTrip)
+*/
+  /*enrichedTrip.foreach(println)*/
+
+  val file = new File("D:/gtfs_stm/output/Enricher.csv")
+  val Output = new BufferedWriter(new FileWriter(file))
+  val header: String = "Route ID,ServiceID,Trip ID,Trip_Headsign,Direction id,Shape id,wheelchair_accessible,note_fr,note_en, agency Id, Route Short Name, Route Long Name, Route Type, Route URL, Route Color, Monday, Tuesday,Wednesday, Thursday, Friday, Saturday, Sunday, Start Date, End Date\""
+  Output.write(header)
+  for (line <- enriched) {
+    Output.newLine()
+    Output.write(line.toString)
+  }
+  Output.close()
+}
+
+
+
