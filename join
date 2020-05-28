@@ -1,0 +1,57 @@
+package college.project2
+
+
+case class Trips(route_id: Int, service_id: String, trip_id: String, trip_headSign: String, direction_id: Int, shape_id: Int,
+                 wheelchair_accessible: Int, note_fr: Option[String], note_en: Option[String])
+
+case class Routes(route_id: Int, agency_id: String, route_short_name: String, route_long_name: String, route_type: String,
+                  route_url: String, route_color: String, route_text_color: String)
+
+case class Calendar(service_id: String, monday: String, tuesday: Int, wednesday: Int, thursday: Int, friday: Int, saturday: Int,
+                    sunday: Int, start_date: String, end_date: String)
+
+object Trips extends App {
+  def toCsv(trip: Trips): String = {
+    trip.route_id + "," +
+      trip.service_id + "," +
+      trip.trip_id + "," +
+      trip.trip_headSign + "," +
+      trip.direction_id + "," +
+      trip.shape_id + "," +
+      trip.wheelchair_accessible + "," +
+      trip.note_fr.getOrElse("") + "," +
+      trip.note_en.getOrElse("")
+  }
+}
+
+object Routes extends App {
+  def toCsv(route: Routes): String = {
+    route.route_id + "," +
+      route.agency_id + "," +
+      route.route_short_name + "," +
+      route.route_long_name + "," +
+      route.route_type + "," +
+      route.route_url + "," +
+      route.route_color + "," +
+      route.route_text_color
+  }
+}
+
+object Calendar extends App {
+  def toCsv(calendar: Calendar): String = {
+    calendar.service_id + "," +
+      calendar.monday + "," +
+      calendar.tuesday + "," +
+      calendar.wednesday + "," +
+      calendar.thursday + "," +
+      calendar.friday + "," +
+      calendar.saturday + "," +
+      calendar.sunday + "," +
+      calendar.start_date + "," +
+      calendar.end_date
+  }
+}
+
+case class RouteTrips(trip: Trips, route: Option[Routes])
+
+case class EnrichedTrip(routeTrip: RouteTrips, calendar: Option[Calendar])
